@@ -79,3 +79,21 @@ label {
     width: 100%;
     margin-bottom: 10px;
 }
+.Barchart-controls {
+    display: flex;
+    width: 50%;
+    margin-bottom: 10px;
+}
+.Barchart-controls button {
+    margin: 0;
+    margin-right: 20px;
+}
+ 
+.Barchart-controls select {
+    margin: 0;
+    margin-right: 20px;
+}
+  
+.Barchart {
+    position: relative;
+}
