@@ -6,7 +6,7 @@ var rowConverter = function (d) {
   return {
     area: d["Countries and areas"],
     PrimaryMale: parseFloat(d["OOSR_Primary_Age_Male"]),
-    // PrimaryFemale: parseFloat(d["OOSR_Primary_Age_Female"]),
+    PrimaryFemale: parseFloat(d["OOSR_Primary_Age_Female"]),
     // UpperSecondaryMale: parseFloat(d["OOSR_Upper_Secondary_Age_Male"]),
     // UpperSecondaryFemale: parseFloat(d["OOSR_Upper_Secondary_Age_Female"]),
     // RatePrimaryMale: parseFloat(d["Completion_Rate_Primary_Male"]),
@@ -22,8 +22,7 @@ function Barchart() {
       console.log(data);
 
       // Filter the first 20 items in the data
-      var currentData = data.slice(0, 20);
-
+      var currentData = data.filter(d => d.PrimaryMale > 12 && d.PrimaryFemale > 12)
       // Add svg element
       var svg1 = d3
         .select(".Barchart")
@@ -42,35 +41,60 @@ function Barchart() {
         .range([padding, height - padding])
         .paddingInner(0.2);
 
-      svg1
-        .selectAll("rect")
-        .data(currentData)
-        .enter()
-        .append("rect")
-        .attr("x", padding*2)
-        .attr("y", (d) => yScale(d.area))
-        .attr("width", (d) => xScale(d.PrimaryMale) - padding )
-        .attr("height", yScale.bandwidth())
-        .attr("fill", (d) => "rgb(123, " + d.PrimaryMale + ",1)");
+      // svg1
+      //   .selectAll("rect")
+      //   .data(currentData)
+      //   .enter()
+      //   .append("rect")
+      //   .attr("x", padding*2)
+      //   .attr("y", (d) => yScale(d.area))
+      //   .attr("width", (d) => xScale(d.PrimaryMale) - padding )
+      //   .attr("height", yScale.bandwidth())
+      //   .attr("fill", (d) => "rgb(123, " + d.PrimaryMale + ",1)");
 
-      svg1
-        .selectAll("text.PrimaryMale")
-        .data(currentData)
-        .enter()
-        .append("text")
-        .text(function (d) {
-          return d.PrimaryMale;
-        })
-        .attr("class", "PrimaryMale")
-        .attr("text-anchor", "middle") // Adjusted for better alignment
-        .attr("x", function (d) {
-          return xScale(d.PrimaryMale) + padding /5 *6; // Adjust as needed for better positioning
-        })
-        .attr("y", function (d) {
-          return yScale(d.area) + yScale.bandwidth()/1.8; // Centered vertically in the bar
-        })
-        .attr("font-size", "12px")
-        .attr("fill", "black");
+        var subgroupScale = d3.scaleBand()
+        .domain(['PrimaryMale', 'PrimaryFemale'])
+        .range([0, yScale.bandwidth()])
+        .padding([0.05]);
+
+  svg1.selectAll(".bar-primary-male")
+  .data(currentData)
+  .enter().append("rect")
+  .attr("class", "bar-primary-male")
+  .attr("x", d => padding *2  )
+  .attr("y", d => padding /20  + subgroupScale('PrimaryMale')+ yScale(d.area))
+  .attr("width", d => height - padding - xScale(d.PrimaryMale))
+  .attr("height", subgroupScale.bandwidth())
+  .attr("fill", "green");
+
+  svg1.selectAll(".bar-primary-female")
+  .data(currentData)
+  .enter().append("rect")
+  .attr("class", "bar-primary-female")
+  .attr("x", d => padding *2  )
+  .attr("y", d => padding /20 + subgroupScale('PrimaryFemale')+ yScale(d.area))
+  .attr("width", d => height - padding - xScale(d.PrimaryFemale))
+  .attr("height", subgroupScale.bandwidth())
+  .attr("fill", "black");
+
+      // svg1
+      //   .selectAll("text.PrimaryMale")
+      //   .data(currentData)
+      //   .enter()
+      //   .append("text")
+      //   .text(function (d) {
+      //     return d.PrimaryMale;
+      //   })
+      //   .attr("class", "PrimaryMale")
+      //   .attr("text-anchor", "middle") // Adjusted for better alignment
+      //   .attr("x", function (d) {
+      //     return xScale(d.PrimaryMale) + padding  ; // Adjust as needed for better positioning
+      //   })
+      //   .attr("y", function (d) {
+      //     return yScale(d.area) + yScale.bandwidth(); // Centered vertically in the bar
+      //   })
+      //   .attr("font-size", "12px")
+      //   .attr("fill", "red");
 
     // Add x-axis
     var xAxis = d3.axisBottom().scale(xScale);
@@ -84,11 +108,11 @@ function Barchart() {
       .call(xAxis);
     svg1
       .append("text")
-      .text("PrimaryMale")
+      .text("%")
       .attr("class", "xAxis-label")
       .attr("text-anchor", "middle")
-      .attr("x", width / 2)
-      .attr("y", height - padding * 0.5)
+      .attr("x", width /1.01)
+      .attr("y", height - padding *0.8)
       .attr("font-size", 20);
 
     // Add Countries and areas label
@@ -101,11 +125,11 @@ function Barchart() {
     })
     .attr("class", "area")
     .attr("text-anchor", "end")
-    .attr("x", padding - 5)
+    .attr("x", padding *1.6)
     .attr("y", function (d) {
       return yScale(d.area) + yScale.bandwidth() / 2 + 4; // Adjust for vertical centering
     })
-    .attr("font-size", "15px")
+    .attr("font-size", "20px")
     .attr("fill", "black");
     })
 }
